@@ -1,0 +1,6 @@
+pip==19.2.1
+ConcurrentLogHandler==0.9.1
+tornado==6.0.4
+requests==2.19.1
+tensorflow==1.14.0
+sklearn==0.0
