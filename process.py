@@ -17,18 +17,18 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 def get_padded_vec(doc,token,lenth):
     #{'<sos>':1,'<eos>':2}
     def texts_to_sequences(input_x,vocab):
-	res = []
-	for x in input_x:
-	    words = x.split(' ')
-	    cur  = [1]
-	    for word in words:
-		if word in vocab:
-		    cur.append(vocab[word]+3)
-		else:
-		    cur.append(0)
-	    cur.append(2)
-	    res.append(cur)
-	return res
+        res = []
+        for x in input_x:
+            words = x.split(' ')
+            cur  = [1]
+            for word in words:
+                if word in vocab:
+                    cur.append(vocab[word]+3)
+                else:
+                    cur.append(0)
+            cur.append(2)
+            res.append(cur)
+            return res
     
     vocab = token.vocabulary_
     
@@ -55,17 +55,17 @@ def process(model,title,content,title_token,content_token,label_dict):
     title_token :tokenizer
     '''
     #preprocess for padded vec
-
+    print('start')
     res = {}
     content_padded = preprocess(content,content_token,200)
     title_padded = preprocess(title,title_token,30)
-
+    print('paded')
     py = model.predict([title_padded,content_padded])[0]
-
+    print('predict')
     class_index = dict(zip(label_dict.values(),label_dict.keys()))
 
     for i in range(len(py)):
         if py[i]>0.5:
-            res[class_index[i]] = py[i]
+            res[class_index[i]] = float(py[i])
 
     return {'category_classification_v2':res}

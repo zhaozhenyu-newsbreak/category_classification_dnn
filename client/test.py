@@ -11,7 +11,7 @@ import requests
 import json
 import time
 
-url_prefix = 'http://0.0.0.0:9111/api/v0/sensitive'
+url_prefix = 'http://0.0.0.0:9111/api/v0/category_classification_dnn'
 
 test_file = sys.argv[1]
 
@@ -19,9 +19,9 @@ start = time.time()
 
 for lines in open(test_file):
     data = lines.strip().split('\t')
-    docinfo = json.loads(data[1])
+    docinfo = json.loads(data[2])
     return_info = requests.post(url_prefix,json = docinfo)
     return_dict = json.loads(return_info.text)
-    print(str(return_dict['label'])+'\t'+json.dumps(return_dict))
+    print(str(return_dict['category_classification_v2'])+'\t'+json.dumps(return_dict)+'\t'+str(data[0]))
 
 print(time.time()-start)

@@ -27,16 +27,9 @@ import process
 from tensorflow.keras.models import load_model
 from attention import AttentionWithContext
 
-#idf_dict = process.get_value_dict('./dict/idf.dict')
-#embedding = process.get_embedding_dict('/mnt/nlp/big_sources/top50w.embedding',300)
-model = load_model('/mnt/nlp/text-classify-v2/model/lstm-att-complex-v4-04',
-        custom_objects={'AttentionWithContext':AttentionWithContext})
-title_token = pickle.load(open('./dict/title_token.pcl','rb'))
-content_token = pickle.load(open('./dict/content_token.pcl','rb'))
-label_dict = load_local_dict('./dict/new.dict')
-print('local file loaded')
 
-def get_local_dict(path):
+
+def load_local_dict(path):
     ''' 
     input: file_name './dict/label.dict' one label one line
     output: diction k is label while v is row num -1
@@ -51,20 +44,30 @@ def get_local_dict(path):
 
 
 
+#idf_dict = process.get_value_dict('./dict/idf.dict')
+#embedding = process.get_embedding_dict('/mnt/nlp/big_sources/top50w.embedding',300)
+model = load_model('/mnt/nlp/text-classify-v2/model/lstm-att-complex-v4-04',
+        custom_objects={'AttentionWithContext':AttentionWithContext})
+title_token = pickle.load(open('./dict/title_token.pcl','rb'))
+content_token = pickle.load(open('./dict/content_token.pcl','rb'))
+label_dict = load_local_dict('./dict/new.dict')
+print('local file loaded')
+
+
 
 class MainHandler(tornado.web.RequestHandler):
     """
     测试路由
     """
     def get(self):
-        self.finish('NB - NLP - SENSITIVE\n')
+        self.finish('NB - NLP - CATEGORY-V2\n')
 
 class ProcessHandler(tornado.web.RequestHandler):
     """
     计算
     """
     def post(self):
-        response_dict = {'code': -1,'label':0,'score':'0.0','keywords':[]}
+        response_dict = {'code': -1,'category_classification_v2':{}}
         docid = 'no_id'
         try:
             data_dict = json.loads(self.request.body)
@@ -72,10 +75,10 @@ class ProcessHandler(tornado.web.RequestHandler):
             docid = data_dict.get('docid')
             if docid ==None:
                 docid = 'no_id'
-            title = data_dict.get('seg_title')
+            title = data_dict.get('title')
             if title == None:
                 title = ''
-            content = data_dict.get('seg_content')
+            content = data_dict.get('content')
             if content == None:
                 content = ''
             args_dict = {'docid':docid,'title':title}
@@ -110,7 +113,7 @@ def run():
     logService.info('Instance {0} start successfully'.format(SERVER_PORT))
     print('Instance {0} start successfully'.format(SERVER_PORT))
     server.bind(SERVER_PORT)
-    server.start(2)
+    server.start(1)
     tornado.ioloop.IOLoop.instance().start()
 
 
