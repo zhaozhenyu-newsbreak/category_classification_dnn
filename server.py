@@ -72,13 +72,13 @@ class ProcessHandler(tornado.web.RequestHandler):
         try:
             data_dict = json.loads(self.request.body)
             ##get parameters
-            docid = data_dict.get('docid')
+            docid = data_dict.get('_id')
             if docid ==None:
                 docid = 'no_id'
-            title = data_dict.get('title')
+            title = data_dict.get('seg_title')
             if title == None:
                 title = ''
-            content = data_dict.get('content')
+            content = data_dict.get('seg_content')
             if content == None:
                 content = ''
             args_dict = {'docid':docid,'title':title}
