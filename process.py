@@ -49,23 +49,70 @@ def preprocess(doc,token,lenth):
     doc_padded = get_padded_vec(doc = [doc],token = token,lenth = lenth)
     return doc_padded
 
+
+def rule_based(title,content,cur_res,label_dict):
+    #covid->health
+    res={}
+    conv_list = ['covid','corona'] 
+    if len(cur_res) == 0 :
+        for k in conv_list:
+            if k in title.lower():
+                res['Health_PublicHealth'] = 1.0
+                break
+    else:
+        return cur_res
+    return res
+
+def regular_result(cur_res):
+    res = {}
+    first_cat = {}
+    second_cat = {}
+    third_cat = {}
+    other = {}
+    for k in cur_res:
+        lenth = len(k.split('_'))
+        if lenth == 1:
+            first_cat[k] = cur_res[k]
+        elif lenth == 2:
+            second_cat[k] = cur_res[k]
+        elif lenth == 3:
+            third_cat[k] = cur_res[k]
+    for k in third_cat:
+        sec = '_'.join(k.split('_')[:2])
+        if sec not in second_cat:
+            second_cat[sec] = third_cat[k]
+    for k in second_cat:
+        first = k.split('_')[0]
+        if first not in first_cat:
+            first_cat[first] = second_cat[k]
+    res['first_cat'] = first_cat
+    res['second_cat'] = second_cat
+    res['third'] = third_cat
+    return res
+
+
+
 def process(model,title,content,title_token,content_token,label_dict):
     '''
     main processing function：
     title_token :tokenizer
     '''
     #preprocess for padded vec
-    print('start')
     res = {}
     content_padded = preprocess(content,content_token,200)
     title_padded = preprocess(title,title_token,30)
-    print('paded')
+    
+    #model result 
     py = model.predict([title_padded,content_padded])[0]
-    print('predict')
     class_index = dict(zip(label_dict.values(),label_dict.keys()))
 
     for i in range(len(py)):
         if py[i]>0.5:
             res[class_index[i]] = float(py[i])
+    
+    #rule based
+    res = rule_based(title,content,res,label_dict)
 
+    #regular result
+    res = regular_result(res)
     return {'category_classification_v2':res}
