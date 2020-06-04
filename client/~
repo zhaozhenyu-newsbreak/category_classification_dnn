@@ -12,7 +12,6 @@ import json
 import time
 
 #url_prefix = 'http://0.0.0.0:9111/api/v0/category_classification_dnn'
-#url_prefix = 'http://172.31.128.129:9111/api/v0/category_classification_dnn'
 url_prefix = 'http://text-category-dnn.default.svc.k8sc1.nb.com:9111/api/v0/category_classification_dnn'
 test_file = sys.argv[1]
 

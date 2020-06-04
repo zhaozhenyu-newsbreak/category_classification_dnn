@@ -67,7 +67,7 @@ class ProcessHandler(tornado.web.RequestHandler):
     计算
     """
     def post(self):
-        response_dict = {'code': -1,'category_classification_v2':{}}
+        response_dict = {'status': 'failed','text_category_v2':{},'reason':'no_id'}
         docid = 'no_id'
         try:
             data_dict = json.loads(self.request.body)
@@ -86,16 +86,18 @@ class ProcessHandler(tornado.web.RequestHandler):
             #process
             result = process.process(model,title,content,title_token,content_token,label_dict)
             #result
-            result["code"] = 0
-            result["docid"] = docid
+            result["status"] = 'success'
+            result["reason"] = docid
             response_dict_string = json.dumps(result, ensure_ascii=False)
             logOutput.info('server\t%s\t%s' % (docid, response_dict_string))
             self.finish(response_dict_string)
         except Exception as e:
             msg = str(traceback.format_exc())
+            respones_dict['reason'] = docid +'\t'+msg
             response_dict_string = json.dumps(response_dict, ensure_ascii=False)
-            logError.error('server\t%s\t%s' % (docid, str(msg)))
-            logOutput.info('server\t%s\t%s' % (docid, response_dict_string))
+            logError.error('ERROR\t%s\t%s' % (docid, str(msg)))
+            logOutput.info('ERROR\t%s\t%s' % (docid, response_dict_string))
+            
             self.finish(response_dict_string)
 
 

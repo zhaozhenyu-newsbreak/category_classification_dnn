@@ -115,4 +115,4 @@ def process(model,title,content,title_token,content_token,label_dict):
 
     #regular result
     res = regular_result(res)
-    return {'category_classification_v2':res}
+    return {'text_category_v2':res}
