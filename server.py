@@ -67,7 +67,7 @@ class ProcessHandler(tornado.web.RequestHandler):
     计算
     """
     def post(self):
-        response_dict = {'status': 'failed','text_category_v2':{},'reason':'no_id'}
+        response_dict = {'status': 'failed','text_category_v2':{},'reason':''}
         docid = 'no_id'
         try:
             data_dict = json.loads(self.request.body)
@@ -87,7 +87,6 @@ class ProcessHandler(tornado.web.RequestHandler):
             result = process.process(model,title,content,title_token,content_token,label_dict)
             #result
             result["status"] = 'success'
-            result["reason"] = docid
             response_dict_string = json.dumps(result, ensure_ascii=False)
             logOutput.info('server\t%s\t%s' % (docid, response_dict_string))
             self.finish(response_dict_string)
