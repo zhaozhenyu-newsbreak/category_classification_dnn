@@ -46,7 +46,7 @@ def load_local_dict(path):
 
 #idf_dict = process.get_value_dict('./dict/idf.dict')
 #embedding = process.get_embedding_dict('/mnt/nlp/big_sources/top50w.embedding',300)
-model = load_model('/mnt/nlp/text-classify-v2/model/lstm-att-complex-v4-04',
+model = load_model('/mnt/nlp/text-classify-v2/model/lstm-att-complex-v4-6-11',
         custom_objects={'AttentionWithContext':AttentionWithContext})
 title_token = pickle.load(open('./dict/title_token.pcl','rb'))
 content_token = pickle.load(open('./dict/content_token.pcl','rb'))
