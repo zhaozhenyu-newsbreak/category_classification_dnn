@@ -12,7 +12,7 @@ import numpy as np
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+import sports_match
 
 def get_padded_vec(doc,token,lenth):
     #{'<sos>':1,'<eos>':2}
@@ -60,7 +60,18 @@ def rule_based(title,content,cur_res,label_dict):
                 res['Health_PublicHealth'] = 1.0
                 break
     else:
+        if 'Sports' in cur_res:
+            sports = sports_match.search(content)
+            cur_sports = []
+            for k in sports:
+                cur_sports.append((k,len(sports[k])))
+            cur_sports = sorted(cur_sports,key=lambda x:x[1],reverse=True)
+            if len(cur_sports)>0 and  cur_sports[0][1]>3 and cur_sports[0][0] not in cur_res:
+                cur_res[cur_sports[0][0]] = 1.0
+
         return cur_res
+
+
     return res
 
 def regular_result(cur_res):

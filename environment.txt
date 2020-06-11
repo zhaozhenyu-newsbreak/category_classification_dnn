@@ -4,3 +4,4 @@ tornado==6.0.4
 requests==2.19.1
 tensorflow==1.14.0
 sklearn==0.0
+ahocorapy==1.5.2
