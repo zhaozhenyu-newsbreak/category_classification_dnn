@@ -87,7 +87,7 @@ def regular_result(cur_res):
             first_cat[first] = second_cat[k]
     res['first_cat'] = first_cat
     res['second_cat'] = second_cat
-    res['third'] = third_cat
+    res['third_cat'] = third_cat
     return res
 
 
