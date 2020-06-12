@@ -9,10 +9,32 @@
 import sys
 import re
 import numpy as np
-
+import json
+import sklearn
+import pickle
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import TfidfVectorizer
 import sports_match
+
+from tensorflow.keras.models import load_model
+from attention import AttentionWithContext
+
+
+
+def load_local_dict(path):
+    ''' 
+    input: file_name './dict/label.dict' one label one line
+    output: diction k is label while v is row num -1
+    '''
+    res = {}
+    cur = 0 
+    for lines in open(path):
+        data = lines.strip()
+        res[data]=cur
+        cur+=1
+    return res
+
+
 
 def get_padded_vec(doc,token,lenth):
     #{'<sos>':1,'<eos>':2}
@@ -28,13 +50,12 @@ def get_padded_vec(doc,token,lenth):
                     cur.append(0)
             cur.append(2)
             res.append(cur)
-            return res
+        return res
     
     vocab = token.vocabulary_
     
     word_ids = texts_to_sequences(doc,vocab)
     padded_input = pad_sequences(word_ids,maxlen=lenth,padding='post',truncating='post')
-    
     return padded_input
 
 
@@ -45,8 +66,8 @@ def preprocess(doc,token,lenth):
     return:
         padded doc
     '''
-    doc = doc.lower()
-    doc_padded = get_padded_vec(doc = [doc],token = token,lenth = lenth)
+    
+    doc_padded = get_padded_vec(doc = doc,token = token,lenth = lenth)
     return doc_padded
 
 
@@ -111,27 +132,54 @@ def regular_result(cur_res):
 
 
 
-def process(model,title,content,title_token,content_token,label_dict):
+def process(model,id,url,title,content,title_token,content_token,label_dict):
     '''
     main processing function：
     title_token :tokenizer
     '''
     #preprocess for padded vec
-    res = {}
     content_padded = preprocess(content,content_token,200)
     title_padded = preprocess(title,title_token,30)
     
     #model result 
-    py = model.predict([title_padded,content_padded])[0]
+    py = model.predict([title_padded,content_padded])
     class_index = dict(zip(label_dict.values(),label_dict.keys()))
+    for j in range(len(py)):
+        res = {}
+        for i in range(len(py[j])):
+            if py[j][i]>0.5:
+                res[class_index[i]] = float(py[j][i])
+        
+        #rule based
+        res = rule_based(title[j],content[j],res,label_dict)
 
-    for i in range(len(py)):
-        if py[i]>0.5:
-            res[class_index[i]] = float(py[i])
-    
-    #rule based
-    res = rule_based(title,content,res,label_dict)
+        #regular result
+        res = regular_result(res)
+        print(json.dumps({'text_category_v2':res,'_id':id[j],'url':url[j]}))
 
-    #regular result
-    res = regular_result(res)
-    return {'text_category_v2':res}
+
+if __name__=='__main__':
+    model = load_model('/mnt/nlp/text-classify-v2/model/lstm-att-complex-v4-6-11',
+            custom_objects={'AttentionWithContext':AttentionWithContext})
+    title_token = pickle.load(open('./dict/title_token.pcl','rb'))
+    content_token = pickle.load(open('./dict/content_token.pcl','rb'))
+    label_dict = load_local_dict('./dict/new.dict')
+    path = sys.argv[1]
+    content = []
+    title = []
+    id = []
+    url = []
+    for lines in open(path):
+        try:
+            data = json.loads(lines.strip())
+            content_ = data['content'].lower()
+            title_ = data['title'].lower()
+            id_ = data['docid']
+            url_ = data['url']
+        except :
+            continue
+        content.append(content_)
+        title.append(title_)
+        id.append(id_)
+        url.append(url_)
+    process(model,id,url,title,content,title_token,content_token,label_dict)
