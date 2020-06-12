@@ -96,6 +96,14 @@ def regular_result(cur_res):
         first = k.split('_')[0]
         if first not in first_cat:
             first_cat[first] = second_cat[k]
+    #add other
+    for key in second_cat:
+        if key not in str(third_cat):
+            third_cat[key+'_Other'] = second_cat[key]
+    for key in first_cat:
+        if key not in str(second_cat):
+            second_cat[key+'_Other'] = first_cat[key]
+    
     res['first_cat'] = first_cat
     res['second_cat'] = second_cat
     res['third_cat'] = third_cat
